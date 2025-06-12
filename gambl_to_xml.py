@@ -1,3 +1,6 @@
+import xml.etree.ElementTree as ET
+import phono
+
 file_name = input("File: ")
 
 def convert_file(file):
@@ -13,7 +16,7 @@ def convert_file(file):
             writeLength = i - writeLength - 1
             break
     
-    writeFile = open('xml/'+file_name+'.xml', 'w')
+    writeFile = open('data/xml/'+file_name+'.xml', 'w')
     writeFile.write(file.read(writeLength))
 
     writeFile.close()
@@ -21,4 +24,25 @@ def convert_file(file):
 
     #print(file.read())
 
-convert_file(open(file_name+'.gambl', 'r'))
+def convert_to_wav():
+    tree = ET.parse('data/xml/'+file_name+'.xml')
+    root = tree.getroot()
+
+    data = [[],[]]
+
+    for i, dataSet in enumerate(root.find('DataSet').findall('DataColumn')):
+        #print(dataSet.find('DataObjectName').text + dataSet.find('ColumnCells').text)
+        tmpString = ""
+        for char in dataSet.find('ColumnCells').text[1:]:
+            if char == "\n":
+                data[i].append(float(tmpString))
+                tmpString = ""
+            else:
+                tmpString += char
+        #print(child.tag, child.attrib)
+        #print(data)
+        #print("")
+    phono.generate_file(file_name, data)
+
+convert_file(open('data/'+file_name+'.gambl', 'r'))
+convert_to_wav()
